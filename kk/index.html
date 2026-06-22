@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>명월 타투</title>
+<script src="https://js.tosspayments.com/v1/payment"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500&family=Noto+Serif+KR:wght@400;600&display=swap');
+  :root {
+    --purple: #7F77DD; --purple-dark: #3C3489; --purple-light: #EEEDFE;
+    --teal: #1D9E75; --teal-light: #E1F5EE; --coral: #D85A30;
+    --pink: #D4537E; --amber: #BA7517;
+    --text: #1a1a1a; --text-muted: #666; --text-hint: #999;
+    --border: rgba(0,0,0,0.1); --border-mid: rgba(0,0,0,0.18);
+    --bg: #fff; --bg-soft: #f8f7ff; --radius: 12px; --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Noto Sans KR', sans-serif; color: var(--text); background: var(--bg); }
+
+  .hero { text-align: center; padding: 3rem 1.5rem 2rem; border-bottom: 0.5px solid var(--border); }
+  .hero-tag { display: inline-block; font-size: 11px; letter-spacing: 0.12em; color: var(--purple); border: 0.5px solid var(--purple); padding: 4px 14px; border-radius: 999px; margin-bottom: 1rem; }
+  .hero-name { font-family: 'Noto Serif KR', serif; font-size: 52px; font-weight: 600; letter-spacing: -1px; line-height: 1; margin-bottom: 0.5rem; }
+  .hero-sub { font-size: 14px; color: var(--text-muted); font-weight: 300; }
+  .hero-dots { display: flex; justify-content: center; gap: 6px; margin-top: 1.25rem; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .hero-btn { display: inline-block; padding: 14px 32px; background: var(--purple); color: #fff; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; border: none; }
+  .hero-btn:active { opacity: 0.85; }
+  .hero-btns { display: flex; gap: 10px; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
+  .hero-btn-kakao { display: inline-flex; align-items: center; gap: 7px; padding: 14px 22px; background: #FEE500; color: #191919; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; border: none; text-decoration: none; }
+  .hero-btn-kakao:active { opacity: 0.85; }
+  .hero-btn-book { display: inline-flex; align-items: center; gap: 7px; padding: 14px 22px; background: var(--purple); color: #fff; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; border: none; }
+  .hero-btn-book:active { opacity: 0.85; }
+
+  .section { padding: 2rem 1rem; border-bottom: 0.5px solid var(--border); }
+  .section-title { font-size: 11px; letter-spacing: 0.1em; color: var(--text-hint); text-transform: uppercase; margin-bottom: 1rem; font-weight: 500; }
+  .portfolio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .portfolio-item { border-radius: var(--radius-sm); overflow: hidden; aspect-ratio: 1; position: relative; }
+  .portfolio-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .portfolio-tag { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.55); color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 999px; }
+  .portfolio-item.featured { grid-column: 1 / -1; aspect-ratio: 16/9; }
+
+  .about-box { background: var(--bg-soft); border-radius: var(--radius); padding: 1.25rem; }
+  .about-name { font-family: 'Noto Serif KR', serif; font-size: 20px; margin-bottom: 6px; }
+  .about-desc { font-size: 14px; color: var(--text-muted); line-height: 1.8; }
+  .about-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1rem; }
+  .about-tag { font-size: 11px; padding: 4px 10px; border-radius: 999px; background: var(--purple-light); color: var(--purple-dark); }
+  .insta-link { display: flex; align-items: center; gap: 6px; margin-top: 1rem; font-size: 13px; color: var(--purple); text-decoration: none; }
+
+  .steps-bar { display: flex; padding: 0 1rem; border-bottom: 0.5px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+  .steps-bar::-webkit-scrollbar { display: none; }
+  .step-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0.75rem 0.5rem; flex: 1; min-width: 56px; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; border: 0.5px solid var(--border-mid); color: var(--text-hint); background: var(--bg); transition: all 0.2s; }
+  .step-item.active .step-num { background: var(--purple); color: #fff; border-color: var(--purple); }
+  .step-item.done .step-num { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .step-lbl { font-size: 10px; color: var(--text-hint); white-space: nowrap; }
+  .step-item.active .step-lbl { color: var(--purple); font-weight: 500; }
+  .step-item.done .step-lbl { color: var(--teal); }
+
+  .panel { display: none; padding: 1.25rem 1rem 2rem; }
+  .panel.active { display: block; }
+  .sec-label { font-size: 10px; letter-spacing: 0.1em; color: var(--text-hint); text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 500; }
+
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.25rem; }
+  .chip { padding: 10px 16px; border-radius: 999px; border: 0.5px solid var(--border-mid); font-size: 13px; color: var(--text-muted); cursor: pointer; background: var(--bg); font-family: 'Noto Sans KR', sans-serif; min-height: 44px; display: flex; align-items: center; }
+  .chip:active { transform: scale(0.97); }
+  .chip.sel-purple { background: var(--purple); color: #fff; border-color: var(--purple); }
+  .chip.sel-coral { background: var(--coral); color: #fff; border-color: var(--coral); }
+  .chip.sel-teal { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .chip.sel-pink { background: var(--pink); color: #fff; border-color: var(--pink); }
+  .chip.sel-amber { background: var(--amber); color: #fff; border-color: var(--amber); }
+
+  .size-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
+  .size-box { background: var(--bg-soft); border-radius: var(--radius-sm); padding: 1rem; }
+  .size-box label { font-size: 12px; color: var(--text-hint); display: block; margin-bottom: 6px; }
+  .size-inp-row { display: flex; align-items: center; gap: 6px; }
+  .size-inp-row input { width: 70px; padding: 10px 8px; border-radius: var(--radius-sm); border: 0.5px solid var(--border-mid); font-size: 18px; font-family: 'Noto Sans KR', sans-serif; color: var(--text); background: var(--bg); text-align: center; }
+  .size-inp-row input:focus { outline: none; border-color: var(--purple); }
+  .unit { font-size: 13px; color: var(--text-hint); }
+
+  .est-box { border: 0.5px solid var(--purple); border-radius: var(--radius); padding: 1.25rem; background: var(--purple-light); display: flex; justify-content: space-between; align-items: center; }
+  .est-main-label { font-size: 12px; color: var(--purple-dark); font-weight: 500; margin-bottom: 4px; }
+  .est-amount { font-size: 28px; font-weight: 500; color: var(--purple-dark); font-family: 'Noto Serif KR', serif; }
+  .est-deposit { font-size: 12px; color: var(--purple); margin-top: 4px; }
+  .est-right { text-align: right; }
+  .est-unit-label { font-size: 11px; color: var(--purple); }
+
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .cal-month { font-size: 15px; font-weight: 500; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-day-lbl { font-size: 10px; color: var(--text-hint); text-align: center; padding: 4px 0; font-weight: 500; }
+  .cal-day-lbl:first-child { color: #E24B4A; }
+  .date-btn { aspect-ratio: 1; border-radius: 50%; font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); border: none; background: none; font-family: 'Noto Sans KR', sans-serif; min-height: 38px; }
+  .date-btn:active:not(.unavail):not(.past) { transform: scale(0.92); }
+  .date-btn.unavail { color: var(--border-mid); text-decoration: line-through; cursor: default; }
+  .date-btn.past { color: #ccc; cursor: default; }
+  .date-btn.selected { background: var(--purple); color: #fff; }
+  .cal-legend { display: flex; gap: 14px; margin-top: 1rem; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-hint); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .timeslot-wrap { margin-top: 1.25rem; animation: fadeUp 0.2s ease; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  .timeslot-date-str { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 12px; }
+  .timeslot-lbl { font-size: 10px; letter-spacing: 0.1em; color: var(--text-hint); text-transform: uppercase; font-weight: 500; margin-bottom: 10px; }
+  .timeslot-group { display: flex; gap: 10px; }
+  .timeslot-btn { flex: 1; border-radius: var(--radius-sm); border: 0.5px solid var(--border-mid); background: var(--bg); padding: 16px 10px; text-align: center; cursor: pointer; }
+  .timeslot-btn:active:not(.ts-full) { transform: scale(0.97); }
+  .timeslot-btn.ts-full { background: var(--bg-soft); cursor: default; opacity: 0.5; }
+  .timeslot-btn.ts-sel { background: var(--purple); border-color: var(--purple); }
+  .ts-time { font-family: 'Noto Serif KR', serif; font-size: 22px; color: var(--text); margin-bottom: 2px; }
+  .ts-dur  { font-size: 11px; color: var(--text-hint); margin-bottom: 6px; }
+  .ts-badge { display: inline-block; font-size: 10px; padding: 2px 9px; border-radius: 999px; }
+  .ts-avail { background: var(--purple-light); color: var(--purple-dark); }
+  .ts-full-badge { background: #eee; color: #aaa; }
+  .timeslot-btn.ts-sel .ts-time,
+  .timeslot-btn.ts-sel .ts-dur { color: #fff; }
+  .timeslot-btn.ts-sel .ts-badge { background: rgba(255,255,255,0.25); color: #fff; }
+
+  .upload-area { border: 1.5px dashed var(--border-mid); border-radius: var(--radius); padding: 2rem 1rem; text-align: center; cursor: pointer; margin-bottom: 1rem; background: var(--bg-soft); }
+  .upload-area.has-file { border-color: var(--teal); background: var(--teal-light); }
+  .upload-icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-text { font-size: 14px; color: var(--text-muted); }
+  .upload-sub { font-size: 12px; color: var(--text-hint); margin-top: 4px; }
+  #fileInput { display: none; }
+  .preview-img { width: 100%; border-radius: var(--radius-sm); margin-top: 10px; max-height: 200px; object-fit: cover; }
+
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { font-size: 12px; color: var(--text-hint); display: block; margin-bottom: 5px; }
+  .form-group input, .form-group textarea { width: 100%; padding: 12px 14px; border-radius: var(--radius-sm); border: 0.5px solid var(--border-mid); font-size: 15px; font-family: 'Noto Sans KR', sans-serif; color: var(--text); background: var(--bg); }
+  .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--purple); }
+  .form-group textarea { resize: none; line-height: 1.6; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .summary-card { background: var(--bg-soft); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+  .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-key { color: var(--text-hint); font-size: 12px; }
+  .summary-val { color: var(--text); font-weight: 500; }
+  .pay-box { background: #E8F3FF; border: 0.5px solid #3182F6; border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.25rem; }
+  .pay-label { font-size: 12px; color: #3182F6; margin-bottom: 4px; }
+  .pay-amount { font-size: 30px; font-weight: 500; color: #1A5FBF; font-family: 'Noto Serif KR', serif; }
+  .pay-note { font-size: 12px; color: var(--text-hint); margin-top: 6px; }
+
+  .btn-row { display: flex; gap: 8px; padding: 1rem 1rem 0; }
+  .btn-back { padding: 14px 18px; border-radius: var(--radius-sm); border: 0.5px solid var(--border-mid); background: var(--bg); color: var(--text-muted); font-size: 14px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; min-height: 48px; }
+  .btn-next { flex: 1; padding: 14px; border-radius: var(--radius-sm); border: none; background: var(--purple); color: #fff; font-size: 15px; font-weight: 500; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; min-height: 48px; }
+  .btn-next:active { opacity: 0.85; }
+  .btn-pay { flex: 1; padding: 14px; border-radius: var(--radius-sm); border: none; background: #3182F6; color: #fff; font-size: 15px; font-weight: 500; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+  .success-wrap { text-align: center; padding: 3rem 1.5rem; }
+  .success-icon { width: 72px; height: 72px; border-radius: 50%; background: var(--teal-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 32px; }
+  .success-title { font-family: 'Noto Serif KR', serif; font-size: 22px; margin-bottom: 8px; }
+  .success-sub { font-size: 14px; color: var(--text-muted); line-height: 1.8; }
+  .kakao-badge { display: inline-flex; align-items: center; gap: 6px; background: #FEE500; color: #3B1E08; font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 999px; margin-top: 1.25rem; }
+
+  .divider { height: 0.5px; background: var(--border); margin: 1rem 0; }
+  .notice { background: #FFF9EC; border: 0.5px solid #F0C060; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12px; color: #7A5800; margin-bottom: 1rem; line-height: 1.6; }
+  .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 12px; font-size: 14px; color: var(--text-muted); }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--purple-light); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .page { display: none; }
+  .page.active { display: block; }
+</style>
+</head>
+<body>
+
+<div id="loadingOverlay" class="loading-overlay" style="display:none">
+  <div class="spinner"></div>
+  <div id="loadingText">처리 중...</div>
+</div>
+
+<!-- 메인 페이지 -->
+<div class="page active" id="mainPage">
+  <div class="hero">
+    <div class="hero-tag">TATTOO ARTIST</div>
+    <div class="hero-name">명월</div>
+    <div class="hero-sub">서울 · 컬러 타투 · 감각적인 일러스트</div>
+    <div class="hero-dots">
+      <div class="dot" style="background:#7F77DD"></div>
+      <div class="dot" style="background:#D4537E"></div>
+      <div class="dot" style="background:#1D9E75"></div>
+      <div class="dot" style="background:#D85A30"></div>
+    </div>
+    <div class="hero-btns">
+      <a class="hero-btn-kakao" href="https://open.kakao.com/o/XXXXXXXX" target="_blank">
+        <!-- 카카오 말풍선 아이콘 -->
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2C5.582 2 2 4.91 2 8.5c0 2.28 1.374 4.282 3.45 5.472L4.5 17l3.62-1.93C8.73 15.18 9.36 15.25 10 15.25c4.418 0 8-2.91 8-6.5S14.418 2 10 2z" fill="#191919"/>
+        </svg>
+        카카오톡 문의
+      </a>
+      <button class="hero-btn-book" onclick="goBooking()">
+        바로 예약하기 →
+      </button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Portfolio</div>
+    <div class="portfolio-grid">
+      <div class="portfolio-item featured">
+        <img src="https://uhckhpfvtpmwvprbkoal.supabase.co/storage/v1/object/public/designs/KakaoTalk_20260616_212136653_05.jpg" alt="타투 작품">
+        <div class="portfolio-tag">새벽</div>
+      </div>
+      <div class="portfolio-item">
+        <img src="https://uhckhpfvtpmwvprbkoal.supabase.co/storage/v1/object/public/designs/KakaoTalk_20260616_212136653_01.jpg" alt="타투 작품">
+        <div class="portfolio-tag">흐름</div>
+      </div>
+      <div class="portfolio-item">
+        <img src="https://uhckhpfvtpmwvprbkoal.supabase.co/storage/v1/object/public/designs/KakaoTalk_20260616_212136653_02.jpg" alt="타투 작품">
+        <div class="portfolio-tag">온기</div>
+      </div>
+      <div class="portfolio-item">
+        <img src="https://uhckhpfvtpmwvprbkoal.supabase.co/storage/v1/object/public/designs/KakaoTalk_20260616_212136653_03.jpg" alt="타투 작품">
+        <div class="portfolio-tag">꽃비</div>
+      </div>
+      <div class="portfolio-item">
+        <img src="https://uhckhpfvtpmwvprbkoal.supabase.co/storage/v1/object/public/designs/KakaoTalk_20260616_212136653_04.jpg" alt="타투 작품">
+        <div class="portfolio-tag">달빛</div>
+      </div>
+      <div class="portfolio-item">
+        <img src="https://uhckhpfvtpmwvprbkoal.supabase.co/storage/v1/object/public/designs/KakaoTalk_20260616_212136653.jpg" alt="타투 작품">
+        <div class="portfolio-tag">별자리</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">About</div>
+    <div class="about-box">
+      <div class="about-name">명월</div>
+      <div class="about-desc">색감과 선으로 감정을 담아내는 타투이스트입니다.<br>수채화 느낌의 컬러 타투와 감각적인 일러스트를 주로 작업합니다.<br>당신만의 특별한 이야기를 피부 위에 새겨드릴게요.</div>
+      <div class="about-tags">
+        <span class="about-tag">수채화</span>
+        <span class="about-tag">일러스트</span>
+        <span class="about-tag">컬러타투</span>
+        <span class="about-tag">라인워크</span>
+        <span class="about-tag">서울</span>
+      </div>
+      <a class="insta-link" href="https://instagram.com/yangmyeongwol.tt" target="_blank">@ yangmyeongwol.tt</a>
+    </div>
+  </div>
+
+  <div style="padding:1.5rem 1rem 3rem;">
+    <div class="hero-btns" style="margin-top:0;">
+      <a class="hero-btn-kakao" href="https://open.kakao.com/o/XXXXXXXX" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2C5.582 2 2 4.91 2 8.5c0 2.28 1.374 4.282 3.45 5.472L4.5 17l3.62-1.93C8.73 15.18 9.36 15.25 10 15.25c4.418 0 8-2.91 8-6.5S14.418 2 10 2z" fill="#191919"/>
+        </svg>
+        카카오톡 문의
+      </a>
+      <button class="hero-btn-book" onclick="goBooking()">지금 예약하기 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 예약 페이지 -->
+<div class="page" id="bookingPage">
+  <div class="hero" style="padding:1.5rem;display:flex;align-items:center;justify-content:space-between;text-align:left;">
+    <div>
+      <div style="font-size:11px;color:var(--text-hint);letter-spacing:0.08em;margin-bottom:2px;">예약 문의</div>
+      <div style="font-family:'Noto Serif KR',serif;font-size:20px;font-weight:600;">명월</div>
+    </div>
+    <button onclick="goMain()" style="padding:8px 14px;border-radius:999px;border:0.5px solid var(--border-mid);background:var(--bg);font-size:12px;color:var(--text-muted);cursor:pointer;font-family:'Noto Sans KR',sans-serif;">← 뒤로</button>
+  </div>
+
+  <div class="steps-bar" id="stepsBar">
+    <div class="step-item active" id="si1"><div class="step-num">1</div><div class="step-lbl">스타일</div></div>
+    <div class="step-item" id="si2"><div class="step-num">2</div><div class="step-lbl">사이즈</div></div>
+    <div class="step-item" id="si3"><div class="step-num">3</div><div class="step-lbl">날짜</div></div>
+    <div class="step-item" id="si4"><div class="step-num">4</div><div class="step-lbl">정보</div></div>
+    <div class="step-item" id="si5"><div class="step-num">5</div><div class="step-lbl">결제</div></div>
+  </div>
+
+  <div id="panel1" class="panel active">
+    <div class="sec-label">스타일 선택</div>
+    <div class="chip-group" id="styleGroup">
+      <div class="chip" data-color="sel-purple" onclick="pick(this,'style')">달빛</div>
+      <div class="chip" data-color="sel-pink" onclick="pick(this,'style')">별자리</div>
+      <div class="chip" data-color="sel-teal" onclick="pick(this,'style')">흐름</div>
+      <div class="chip" data-color="sel-coral" onclick="pick(this,'style')">꽃비</div>
+      <div class="chip" data-color="sel-amber" onclick="pick(this,'style')">온기</div>
+      <div class="chip" data-color="sel-purple" onclick="pick(this,'style')">새벽</div>
+    </div>
+    <div class="divider"></div>
+    <div class="sec-label">부위 선택</div>
+    <div class="chip-group" id="bodyGroup">
+      <div class="chip" data-color="sel-purple" onclick="pick(this,'body')">손목</div>
+      <div class="chip" data-color="sel-purple" onclick="pick(this,'body')">팔</div>
+      <div class="chip" data-color="sel-purple" onclick="pick(this,'body')">어깨</div>
+      <div class="chip" data-color="sel-purple" onclick="pick(this,'body')">등</div>
+      <div class="chip" data-color="sel-purple" onclick="pick(this,'body')">발목</div>
+      <div class="chip" data-color="sel-purple" onclick="pick(this,'body')">허벅지</div>
+      <div class="chip" data-color="sel-purple" onclick="pick(this,'body')">목</div>
+      <div class="chip" data-color="sel-purple" onclick="pick(this,'body')">옆구리</div>
+    </div>
+  </div>
+
+  <div id="panel2" class="panel">
+    <div class="sec-label">사이즈 입력</div>
+    <div class="size-grid">
+      <div class="size-box"><label>가로</label><div class="size-inp-row"><input type="number" id="wInput" value="5" min="1" max="50" inputmode="numeric" oninput="calc()"><span class="unit">cm</span></div></div>
+      <div class="size-box"><label>세로</label><div class="size-inp-row"><input type="number" id="hInput" value="5" min="1" max="50" inputmode="numeric" oninput="calc()"><span class="unit">cm</span></div></div>
+    </div>
+    <div class="est-box">
+      <div>
+        <div class="est-main-label">예상 견적</div>
+        <div class="est-amount" id="estAmount">250,000원</div>
+        <div class="est-deposit" id="estDeposit">예약금 50,000원</div>
+      </div>
+      <div class="est-right">
+        <div class="est-unit-label">1cm² 당 10,000원</div>
+        <div class="est-unit-label" id="extraLabel" style="margin-top:4px"></div>
+      </div>
+    </div>
+    <div class="notice" style="margin-top:1rem">실제 견적은 도안 복잡도에 따라 달라질 수 있어요. 예약 후 작가가 최종 확인해드립니다.</div>
+  </div>
+
+  <div id="panel3" class="panel">
+    <div class="cal-header"><div class="cal-month" id="calMonth"></div></div>
+    <div class="cal-grid" id="calGrid">
+      <div class="cal-day-lbl">일</div><div class="cal-day-lbl">월</div><div class="cal-day-lbl">화</div>
+      <div class="cal-day-lbl">수</div><div class="cal-day-lbl">목</div><div class="cal-day-lbl">금</div><div class="cal-day-lbl">토</div>
+    </div>
+    <div class="cal-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>예약 가능</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ccc"></div>마감</div>
+    </div>
+
+    <!-- 타임슬롯 (날짜 선택 후 표시) -->
+    <div class="timeslot-wrap" id="timeslotWrap" style="display:none">
+      <div class="divider"></div>
+      <div class="timeslot-date-str" id="timeslotDateStr"></div>
+      <div class="timeslot-lbl">타임 선택</div>
+      <div class="timeslot-group" id="timeslotGroup"></div>
+    </div>
+  </div>
+
+  <div id="panel4" class="panel">
+    <div class="sec-label">고객 정보</div>
+    <div class="form-row">
+      <div class="form-group"><label>이름</label><input type="text" id="fName" placeholder="홍길동"></div>
+      <div class="form-group"><label>나이</label><input type="number" id="fAge" placeholder="만 나이" inputmode="numeric"></div>
+    </div>
+    <div class="form-group"><label>연락처 <span style="color:var(--coral);font-size:11px">필수</span></label>
+      <input type="tel" id="fPhone" placeholder="010-0000-0000" inputmode="tel"
+             oninput="fmtPhone(this)" maxlength="13">
+    </div>
+    <div class="form-group"><label>인스타 아이디 <span style="font-size:11px;color:var(--text-hint)">(선택)</span></label><input type="text" id="fInsta" placeholder="@username"></div>
+    <div class="form-group"><label>원하는 도안 설명</label><textarea id="fDesc" rows="3" placeholder="원하시는 도안을 설명해주세요 :)"></textarea></div>
+    <div class="sec-label" style="margin-top:0.5rem">도안 이미지 업로드 (선택)</div>
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-icon">🖼️</div>
+      <div class="upload-text">사진을 눌러서 업로드하세요</div>
+      <div class="upload-sub">JPG, PNG 파일 지원</div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" onchange="previewFile(this)">
+    <img id="previewImg" class="preview-img" style="display:none" alt="미리보기">
+    <div class="notice">만 20세 이상만 예약이 가능합니다.</div>
+  </div>
+
+  <div id="panel5" class="panel">
+    <div class="sec-label">예약 신청 확인</div>
+    <div class="summary-card">
+      <div class="summary-row"><span class="summary-key">스타일</span><span class="summary-val" id="sumStyle">—</span></div>
+      <div class="summary-row"><span class="summary-key">부위</span><span class="summary-val" id="sumBody">—</span></div>
+      <div class="summary-row"><span class="summary-key">사이즈</span><span class="summary-val" id="sumSize">—</span></div>
+      <div class="summary-row"><span class="summary-key">날짜 / 타임</span><span class="summary-val" id="sumDate">—</span></div>
+      <div class="summary-row"><span class="summary-key">예상 견적</span><span class="summary-val" id="sumTotal">—</span></div>
+      <div class="summary-row"><span class="summary-key">예약금 (20%)</span><span class="summary-val" id="sumDeposit" style="color:var(--purple)">—</span></div>
+    </div>
+    <div class="notice" style="background:var(--purple-light);border-color:var(--purple)">
+      📋 신청서를 제출하면 명월이 검토 후<br>
+      카카오톡으로 예약금 결제 링크를 보내드려요.<br>
+      <b>보통 24시간 이내 연락드립니다.</b>
+    </div>
+  </div>
+
+  <div id="panel6" class="panel">
+    <div class="success-wrap">
+      <div class="success-icon">🌙</div>
+      <div class="success-title">신청이 완료됐어요</div>
+      <div class="success-sub">명월이 신청서를 확인한 후<br>카카오톡으로 연락드릴게요.<br><br>보통 <b>24시간 이내</b> 답변드립니다.<br>급하시면 인스타 DM으로 문의해 주세요 :)</div>
+      <a class="kakao-badge" href="https://instagram.com/yangmyeongwol.tt" target="_blank" style="text-decoration:none;margin-top:1.25rem;display:inline-flex">
+        📷 @yangmyeongwol.tt
+      </a>
+      <div style="margin-top:2rem">
+        <div class="summary-card">
+          <div class="summary-row"><span class="summary-key">이름</span><span class="summary-val" id="doneStyle">—</span></div>
+          <div class="summary-row"><span class="summary-key">날짜 / 타임</span><span class="summary-val" id="doneDate">—</span></div>
+          <div class="summary-row"><span class="summary-key">상태</span><span class="summary-val" id="doneDeposit" style="color:var(--purple)">검토 중</span></div>
+        </div>
+      </div>
+      <button class="hero-btn" style="margin-top:1.5rem" onclick="goMain()">메인으로 돌아가기</button>
+    </div>
+  </div>
+
+  <div class="btn-row" id="btnRow">
+    <button class="btn-back" id="btnBack" onclick="goBack()" style="display:none">← 이전</button>
+    <button class="btn-next" id="btnNext" onclick="goNext()">다음으로 →</button>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://uhckhpfvtpmwvprbkoal.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVoY2tocGZ2dHBtd3ZwcmJrb2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1ODM0NzcsImV4cCI6MjA5NzE1OTQ3N30.rmjd87a0GJV-MIw3y4gIfr0hbltQuvmDOtJ2P5aTxew';
+  const TOSS_CLIENT_KEY = 'test_ck_yZqmkKeP8gBWgRmYdYRKrbQRxB9l';
+
+  const state = { style: null, body: null, date: null, time: null, w: 5, h: 5, file: null, bookingId: null };
+  const styleExtra = {'달빛':15000,'별자리':10000,'흐름':30000,'꽃비':20000,'온기':10000,'새벽':5000};
+  const bodyExtra = {'손목':10000,'팔':0,'어깨':0,'등':0,'발목':10000,'허벅지':5000,'목':20000,'옆구리':15000};
+  let curStep = 1;
+
+  function goMain() {
+    document.getElementById('mainPage').classList.add('active');
+    document.getElementById('bookingPage').classList.remove('active');
+    window.scrollTo(0, 0);
+  }
+  function goBooking() {
+    document.getElementById('mainPage').classList.remove('active');
+    document.getElementById('bookingPage').classList.add('active');
+    curStep = 1; render();
+    window.scrollTo(0, 0);
+  }
+
+  function pick(el, type) {
+    const group = type === 'style' ? 'styleGroup' : 'bodyGroup';
+    document.getElementById(group).querySelectorAll('.chip').forEach(c => {
+      c.classList.remove('sel-purple','sel-coral','sel-teal','sel-pink','sel-amber');
+    });
+    el.classList.add(el.dataset.color);
+    state[type] = el.textContent;
+    calc();
+  }
+
+  function calc() {
+    const w = parseFloat(document.getElementById('wInput').value) || 0;
+    const h = parseFloat(document.getElementById('hInput').value) || 0;
+    state.w = w; state.h = h;
+    const base = w * h * 10000;
+    const se = (state.style && styleExtra[state.style]) || 0;
+    const be = (state.body && bodyExtra[state.body]) || 0;
+    const total = base + se + be;
+    const dep = Math.max(50000, Math.round(total * 0.2 / 10000) * 10000);
+    document.getElementById('estAmount').textContent = total.toLocaleString() + '원';
+    document.getElementById('estDeposit').textContent = '예약금 ' + dep.toLocaleString() + '원';
+    const pa = document.getElementById('payAmount');
+    if (pa) pa.textContent = dep.toLocaleString() + '원';
+    const extras = [];
+    if (se > 0) extras.push(state.style + ' +' + se.toLocaleString());
+    if (be > 0) extras.push(state.body + ' +' + be.toLocaleString());
+    const el = document.getElementById('extraLabel');
+    if (el) el.textContent = extras.join(' / ');
+  }
+
+  function previewFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    state.file = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById('previewImg');
+      img.src = e.target.result;
+      img.style.display = 'block';
+      document.getElementById('uploadArea').classList.add('has-file');
+      document.querySelector('.upload-text').textContent = file.name;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // 운영 타임 설정
+  const TIMES = [
+    { key: '12:00', label: '오전 타임', time: '12:00 PM', dur: '12:00 ~ 16:00 (4시간)' },
+    { key: '16:00', label: '오후 타임', time: '04:00 PM', dur: '16:00 ~ 20:00 (4시간)' },
+  ];
+
+  // 날짜별 예약 현황 캐시 (Supabase에서 로드)
+  let bookedSlots = {}; // { '2025-07-03': ['12:00'], ... }
+
+  async function loadBookedSlots() {
+    try {
+      const now = new Date();
+      const ym = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/bookings?select=booking_date,booking_time&booking_date=gte.${ym}-01&status=neq.cancel`,
+        { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } }
+      );
+      bookedSlots = {};
+      if (res.ok) {
+        const rows = await res.json();
+        rows.forEach(r => {
+          if (!r.booking_date || !r.booking_time) return;
+          if (!bookedSlots[r.booking_date]) bookedSlots[r.booking_date] = [];
+          bookedSlots[r.booking_date].push(r.booking_time);
+        });
+      }
+    } catch(e) {
+      bookedSlots = {}; // 실패해도 빈 객체로 fallback
+    }
+  }
+
+  function isDateFull(dateStr) {
+    const slots = bookedSlots[dateStr] || [];
+    return TIMES.every(t => slots.includes(t.key));
+  }
+
+  function buildCalendar() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const today = now.getDate();
+    const unavail = []; // 휴무일 날짜 숫자로 관리 (예: [3, 10, 17])
+
+    function renderCal() {
+      document.getElementById('calMonth').textContent = year + '년 ' + (month+1) + '월';
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month+1, 0).getDate();
+      const grid = document.getElementById('calGrid');
+      const lbls = Array.from(grid.querySelectorAll('.cal-day-lbl'));
+      grid.innerHTML = '';
+      lbls.forEach(l => grid.appendChild(l));
+      for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div'));
+      for (let d = 1; d <= daysInMonth; d++) {
+        const btn = document.createElement('div');
+        btn.className = 'date-btn';
+        btn.textContent = d;
+        const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        if (d < today) {
+          btn.classList.add('past');
+        } else if (unavail.includes(d) || isDateFull(dateStr)) {
+          btn.classList.add('unavail');
+        } else {
+          btn.onclick = function() {
+            document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            state.date = dateStr;
+            state.time = null;
+            showTimeslots(dateStr, year, month+1, d);
+          };
+        }
+        grid.appendChild(btn);
+      }
+      document.getElementById('timeslotWrap').style.display = 'none';
+    }
+
+    // 일단 즉시 캘린더 그리고, 예약 현황 로드 후 다시 렌더
+    renderCal();
+    loadBookedSlots().then(() => renderCal());
+  }
+
+  function showTimeslots(dateStr, year, month, day) {
+    const wrap = document.getElementById('timeslotWrap');
+    const booked = bookedSlots[dateStr] || [];
+    document.getElementById('timeslotDateStr').textContent =
+      year + '년 ' + month + '월 ' + day + '일';
+    const group = document.getElementById('timeslotGroup');
+    group.innerHTML = TIMES.map(t => {
+      const isFull = booked.includes(t.key);
+      return `
+        <div class="timeslot-btn ${isFull ? 'ts-full' : ''}" onclick="${isFull ? '' : `pickTime('${dateStr}','${t.key}',this)`}">
+          <div class="ts-time">${t.time}</div>
+          <div class="ts-dur">${t.dur}</div>
+          <span class="ts-badge ${isFull ? 'ts-full-badge' : 'ts-avail'}">${isFull ? '마감' : '예약 가능'}</span>
+        </div>`;
+    }).join('');
+    wrap.style.display = 'block';
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function fmtPhone(input) {
+    let v = input.value.replace(/[^0-9]/g, '');
+    if (v.length <= 3) input.value = v;
+    else if (v.length <= 7) input.value = v.slice(0,3) + '-' + v.slice(3);
+    else input.value = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
+  }
+
+  function pickTime(dateStr, timeKey, el) {
+    document.querySelectorAll('.timeslot-btn').forEach(b => b.classList.remove('ts-sel'));
+    el.classList.add('ts-sel');
+    state.date = dateStr;
+    state.time = timeKey;
+  }
+
+  function buildSummary() {
+    document.getElementById('sumStyle').textContent = state.style || '미선택';
+    document.getElementById('sumBody').textContent  = state.body  || '미선택';
+    document.getElementById('sumSize').textContent  = state.w + 'cm × ' + state.h + 'cm';
+    const timeLabel = state.time === '12:00' ? '오전 타임 (12:00~16:00)' : state.time === '16:00' ? '오후 타임 (16:00~20:00)' : '미선택';
+    document.getElementById('sumDate').textContent  = state.date ? state.date + ' · ' + timeLabel : '미선택';
+    const estAmount  = document.getElementById('estAmount');
+    const estDeposit = document.getElementById('estDeposit');
+    const sumTotal   = document.getElementById('sumTotal');
+    const sumDeposit = document.getElementById('sumDeposit');
+    if (sumTotal && estAmount)   sumTotal.textContent   = estAmount.textContent;
+    if (sumDeposit && estDeposit) sumDeposit.textContent = estDeposit.textContent.replace('예약금 ', '');
+  }
+
+  async function uploadDesignImage() {
+    if (!state.file) return null;
+    const fileName = Date.now() + '_' + state.file.name.replace(/\s/g, '_');
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/designs/${fileName}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': state.file.type,
+      },
+      body: state.file
+    });
+    if (!res.ok) return null;
+    return `${SUPABASE_URL}/storage/v1/object/public/designs/${fileName}`;
+  }
+
+  async function saveBooking() {
+    showLoading('신청서 제출 중...');
+    try {
+      const imageUrl = await uploadDesignImage();
+      const totalText = document.getElementById('estAmount').textContent;
+      const depText   = document.getElementById('estDeposit').textContent;
+      const total = parseInt(totalText.replace(/[^0-9]/g, ''));
+      const dep   = parseInt(depText.replace(/[^0-9]/g, ''));
+
+      const body = {
+        style:          state.style,
+        body_part:      state.body,
+        width_cm:       state.w,
+        height_cm:      state.h,
+        estimated_price: total,
+        deposit:        dep,
+        booking_date:   state.date,
+        booking_time:   state.time,
+        customer_name:  document.getElementById('fName').value.trim(),
+        customer_age:   parseInt(document.getElementById('fAge').value) || null,
+        customer_phone: document.getElementById('fPhone').value.trim(),
+        customer_insta: document.getElementById('fInsta') ? document.getElementById('fInsta').value.trim() : '',
+        description:    document.getElementById('fDesc').value.trim(),
+        design_image_url: imageUrl,
+        status: 'pending'
+      };
+
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+      hideLoading();
+
+      if (!res.ok) {
+        console.error('Supabase 저장 실패:', data);
+        alert('저장 실패: ' + (data?.message || data?.error || JSON.stringify(data)));
+        return;
+      }
+      state.bookingId = data[0]?.id;
+
+      // render() 먼저 해서 panel6 DOM이 보이게 한 뒤 텍스트 설정
+      curStep = 6;
+      render();
+      window.scrollTo(0, 0);
+
+      const timeLabel = state.time === '12:00' ? '오전 타임 (12:00~16:00)' : '오후 타임 (16:00~20:00)';
+      document.getElementById('doneStyle').textContent = body.customer_name + '님';
+      document.getElementById('doneDate').textContent  = state.date + ' · ' + timeLabel;
+
+    } catch(e) {
+      hideLoading();
+      alert('오류가 발생했어요: ' + e.message);
+    }
+  }
+
+  function showLoading(text) {
+    document.getElementById('loadingText').textContent = text;
+    document.getElementById('loadingOverlay').style.display = 'flex';
+  }
+  function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+
+  function goNext() {
+    if (curStep === 3) {
+      if (!state.date) { alert('날짜를 선택해 주세요.'); return; }
+      if (!state.time) { alert('타임을 선택해 주세요. (12시 또는 4시)'); return; }
+    }
+    if (curStep === 4) {
+      const name  = document.getElementById('fName').value.trim();
+      const phone = document.getElementById('fPhone').value.trim();
+      const age   = document.getElementById('fAge').value;
+      if (!name)  { alert('이름을 입력해 주세요.'); return; }
+      if (!age || parseInt(age) < 20) { alert('만 20세 이상만 예약 가능합니다.'); return; }
+      const phoneClean = phone.replace(/-/g, '');
+      if (!phone || !/^010\d{8}$/.test(phoneClean)) {
+        alert('연락처를 정확히 입력해 주세요. (010-0000-0000)'); return;
+      }
+    }
+    if (curStep < 5) {
+      curStep++;
+      render();
+      if (curStep === 3) buildCalendar();
+      if (curStep === 5) buildSummary();
+      window.scrollTo(0, 0);
+    } else {
+      saveBooking();
+    }
+  }
+
+  function goBack() {
+    if (curStep > 1) { curStep--; render(); window.scrollTo(0, 0); }
+  }
+
+  function render() {
+    for (let i = 1; i <= 6; i++) {
+      const p = document.getElementById('panel' + i);
+      if (p) p.classList.toggle('active', i === curStep);
+    }
+    for (let i = 1; i <= 5; i++) {
+      const si = document.getElementById('si' + i);
+      if (si) si.className = 'step-item ' + (i < curStep ? 'done' : i === curStep ? 'active' : '');
+    }
+    document.getElementById('btnBack').style.display = curStep > 1 && curStep < 6 ? 'block' : 'none';
+    const btnNext = document.getElementById('btnNext');
+    if (curStep === 6) {
+      document.getElementById('btnRow').style.display = 'none';
+      document.getElementById('stepsBar').style.display = 'none';
+    } else {
+      document.getElementById('btnRow').style.display = 'flex';
+      document.getElementById('stepsBar').style.display = 'flex';
+      btnNext.textContent = curStep === 5 ? '신청서 제출하기 →' : '다음으로 →';
+      btnNext.style.background = curStep === 5 ? 'var(--teal)' : 'var(--purple)';
+    }
+  }
+
+  calc();
+
+  calc();
+</script>
+</body>
+</html>
