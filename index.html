@@ -526,7 +526,7 @@
         btn.className = 'date-btn';
         btn.textContent = d;
         const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-        if (d < today) {
+        if (d <= today + 1) { 
           btn.classList.add('past');
         } else if (unavail.includes(d) || isDateFull(dateStr)) {
           btn.classList.add('unavail');
