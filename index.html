@@ -266,7 +266,7 @@
   </div>
 
   <div class="steps-bar" id="stepsBar">
-    <div class="step-item active" id="si1"><div class="step-num">1</div><div class="step-lbl">스타일</div></div>
+    <div class="step-item active" id="si1"><div class="step-num">1</div><div class="step-lbl">피부색</div></div>
     <div class="step-item" id="si2"><div class="step-num">2</div><div class="step-lbl">사이즈</div></div>
     <div class="step-item" id="si3"><div class="step-num">3</div><div class="step-lbl">날짜</div></div>
     <div class="step-item" id="si4"><div class="step-num">4</div><div class="step-lbl">정보</div></div>
@@ -274,15 +274,8 @@
   </div>
 
   <div id="panel1" class="panel active">
-    <div class="sec-label">스타일 선택</div>
-    <div class="chip-group" id="styleGroup">
-      <div class="chip" data-color="sel-purple" onclick="pick(this,'style')">달빛</div>
-      <div class="chip" data-color="sel-pink" onclick="pick(this,'style')">별자리</div>
-      <div class="chip" data-color="sel-teal" onclick="pick(this,'style')">흐름</div>
-      <div class="chip" data-color="sel-coral" onclick="pick(this,'style')">꽃비</div>
-      <div class="chip" data-color="sel-amber" onclick="pick(this,'style')">온기</div>
-      <div class="chip" data-color="sel-purple" onclick="pick(this,'style')">새벽</div>
-    </div>
+    <div class="sec-label">피부색 입력</div>
+    <div class="form-group"><label>피부색</label><input type="text" id="fSkinTone" placeholder="예: 밝은 피부, 중간 피부, 어두운 피부"></div>
     <div class="divider"></div>
     <div class="sec-label">부위 선택</div>
     <div class="chip-group" id="bodyGroup">
@@ -341,7 +334,7 @@
     <div class="sec-label">고객 정보</div>
     <div class="form-row">
       <div class="form-group"><label>이름</label><input type="text" id="fName" placeholder="홍길동"></div>
-      <div class="form-group"><label>나이</label><input type="number" id="fAge" placeholder="만 나이" inputmode="numeric"></div>
+      <div class="form-group"><label>생년월일</label><input type="date" id="fBirthDate"></div>
     </div>
     <div class="form-group"><label>연락처 <span style="color:var(--coral);font-size:11px">필수</span></label>
       <input type="tel" id="fPhone" placeholder="010-0000-0000" inputmode="tel"
@@ -357,13 +350,13 @@
     </div>
     <input type="file" id="fileInput" accept="image/*" onchange="previewFile(this)">
     <img id="previewImg" class="preview-img" style="display:none" alt="미리보기">
-    <div class="notice">만 20세 이상만 예약이 가능합니다.</div>
+    <div class="notice">만 18세 이상만 예약이 가능합니다.</div>
   </div>
 
   <div id="panel5" class="panel">
     <div class="sec-label">예약 신청 확인</div>
     <div class="summary-card">
-      <div class="summary-row"><span class="summary-key">스타일</span><span class="summary-val" id="sumStyle">—</span></div>
+      <div class="summary-row"><span class="summary-key">피부색</span><span class="summary-val" id="sumSkinTone">—</span></div>
       <div class="summary-row"><span class="summary-key">부위</span><span class="summary-val" id="sumBody">—</span></div>
       <div class="summary-row"><span class="summary-key">사이즈</span><span class="summary-val" id="sumSize">—</span></div>
       <div class="summary-row"><span class="summary-key">날짜 / 타임</span><span class="summary-val" id="sumDate">—</span></div>
@@ -407,7 +400,7 @@
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVoY2tocGZ2dHBtd3ZwcmJrb2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1ODM0NzcsImV4cCI6MjA5NzE1OTQ3N30.rmjd87a0GJV-MIw3y4gIfr0hbltQuvmDOtJ2P5aTxew';
   const TOSS_CLIENT_KEY = 'test_ck_yZqmkKeP8gBWgRmYdYRKrbQRxB9l';
 
-  const state = { style: null, body: null, date: null, time: null, w: 5, h: 5, file: null, bookingId: null };
+  const state = { skin_tone: null, body: null, date: null, time: null, w: 5, h: 5, file: null, bookingId: null };
   const styleExtra = {'달빛':15000,'별자리':10000,'흐름':30000,'꽃비':20000,'온기':10000,'새벽':5000};
   const bodyExtra = {'손목':10000,'팔':0,'어깨':0,'등':0,'발목':10000,'허벅지':5000,'목':20000,'옆구리':15000};
   let curStep = 1;
@@ -526,7 +519,7 @@
         btn.className = 'date-btn';
         btn.textContent = d;
         const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-        if (d <= today + 1) { 
+        if (d <= today + 1) {
           btn.classList.add('past');
         } else if (unavail.includes(d) || isDateFull(dateStr)) {
           btn.classList.add('unavail');
@@ -583,7 +576,7 @@
   }
 
   function buildSummary() {
-    document.getElementById('sumStyle').textContent = state.style || '미선택';
+    document.getElementById('sumSkinTone').textContent = document.getElementById('fSkinTone').value || '미입력';
     document.getElementById('sumBody').textContent  = state.body  || '미선택';
     document.getElementById('sumSize').textContent  = state.w + 'cm × ' + state.h + 'cm';
     const timeLabel = state.time === '12:00' ? '오전 타임 (12:00~16:00)' : state.time === '16:00' ? '오후 타임 (16:00~20:00)' : '미선택';
@@ -611,6 +604,17 @@
     return `${SUPABASE_URL}/storage/v1/object/public/designs/${fileName}`;
   }
 
+  function getAgeFromBirthDate(dateStr) {
+    if (!dateStr) return null;
+    const birth = new Date(dateStr);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
   async function saveBooking() {
     showLoading('신청서 제출 중...');
     try {
@@ -621,7 +625,7 @@
       const dep   = parseInt(depText.replace(/[^0-9]/g, ''));
 
       const body = {
-        style:          state.style,
+        style:          document.getElementById('fSkinTone').value.trim(),
         body_part:      state.body,
         width_cm:       state.w,
         height_cm:      state.h,
@@ -630,7 +634,7 @@
         booking_date:   state.date,
         booking_time:   state.time,
         customer_name:  document.getElementById('fName').value.trim(),
-        customer_age:   parseInt(document.getElementById('fAge').value) || null,
+        customer_age:   getAgeFromBirthDate(document.getElementById('fBirthDate').value),
         customer_phone: document.getElementById('fPhone').value.trim(),
         customer_insta: document.getElementById('fInsta') ? document.getElementById('fInsta').value.trim() : '',
         description:    document.getElementById('fDesc').value.trim(),
@@ -690,9 +694,11 @@
     if (curStep === 4) {
       const name  = document.getElementById('fName').value.trim();
       const phone = document.getElementById('fPhone').value.trim();
-      const age   = document.getElementById('fAge').value;
+      const birthDate = document.getElementById('fBirthDate').value;
       if (!name)  { alert('이름을 입력해 주세요.'); return; }
-      if (!age || parseInt(age) < 20) { alert('만 20세 이상만 예약 가능합니다.'); return; }
+      if (!birthDate) { alert('생년월일을 입력해 주세요.'); return; }
+      const age = getAgeFromBirthDate(birthDate);
+      if (age < 18) { alert('만 18세 이상만 예약 가능합니다.'); return; }
       const phoneClean = phone.replace(/-/g, '');
       if (!phone || !/^010\d{8}$/.test(phoneClean)) {
         alert('연락처를 정확히 입력해 주세요. (010-0000-0000)'); return;
