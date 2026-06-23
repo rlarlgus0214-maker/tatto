@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>명월 타투 - 신청 조회</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500&family=Noto+Serif+KR:wght@400;600&display=swap');
+  :root {
+    --purple: #7F77DD; --purple-dark: #3C3489; --purple-light: #EEEDFE;
+    --teal: #1D9E75; --teal-light: #E1F5EE; --coral: #D85A30;
+    --pink: #D4537E; --amber: #BA7517;
+    --text: #1a1a1a; --text-muted: #666; --text-hint: #999;
+    --border: rgba(0,0,0,0.1); --border-mid: rgba(0,0,0,0.18);
+    --bg: #fff; --bg-soft: #f8f7ff; --radius: 12px; --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', sans-serif; color: var(--text); background: var(--bg); }
+  
+  .header { text-align: center; padding: 2rem 1.5rem 1.5rem; border-bottom: 0.5px solid var(--border); }
+  .header h1 { font-family: 'Noto Serif KR', serif; font-size: 28px; font-weight: 600; margin-bottom: 0.5rem; }
+  .header p { font-size: 13px; color: var(--text-muted); }
+  .back-btn { display: inline-block; margin-top: 1rem; padding: 8px 14px; border-radius: 999px; border: 0.5px solid var(--border-mid); background: var(--bg); font-size: 12px; color: var(--text-muted); cursor: pointer; font-family: 'Noto Sans KR', sans-serif; text-decoration: none; }
+  .back-btn:active { opacity: 0.7; }
+  
+  .section { padding: 2rem 1rem; max-width: 600px; margin: 0 auto; }
+  .search-box { background: var(--bg-soft); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 2rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+  .form-group input { width: 100%; padding: 12px; border: 1px solid var(--border-mid); border-radius: var(--radius-sm); font-size: 14px; font-family: 'Noto Sans KR', sans-serif; }
+  .btn-search { width: 100%; padding: 12px; background: var(--purple); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+  .btn-search:active { opacity: 0.85; }
+  
+  .results { margin-top: 2rem; }
+  .result-item { background: var(--bg-soft); padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1rem; border-left: 4px solid var(--purple); }
+  .result-date { font-size: 12px; color: var(--text-hint); margin-bottom: 8px; }
+  .result-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .result-label { font-size: 13px; color: var(--text-muted); }
+  .result-val { font-size: 13px; font-weight: 500; color: var(--text); }
+  .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .badge-pending { background: #fff3cd; color: #856404; }
+  .badge-approved { background: #d1ecf1; color: #0c5460; }
+  .badge-paid { background: #d4edda; color: #155724; }
+  .badge-done { background: #e2e3e5; color: #383d41; }
+  
+  .empty { text-align: center; padding: 2rem 1rem; color: var(--text-hint); }
+  .empty p { margin-bottom: 1rem; }
+  
+  .loading { text-align: center; padding: 2rem; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>명월 타투</h1>
+  <p>신청 상태 조회</p>
+  <a href="/" class="back-btn">← 돌아가기</a>
+</div>
+
+<div class="section">
+  <div class="search-box">
+    <div class="form-group">
+      <label>연락처</label>
+      <input type="text" id="phoneInput" placeholder="010-0000-0000" maxlength="13">
+    </div>
+    <button class="btn-search" onclick="searchBookings()">조회</button>
+  </div>
+  
+  <div id="resultsWrap" class="results" style="display:none">
+    <div id="resultsList"></div>
+  </div>
+  
+  <div id="emptyWrap" class="empty" style="display:none">
+    <p>신청 내역이 없습니다.</p>
+  </div>
+  
+  <div id="loadingWrap" class="loading" style="display:none">
+    조회 중...
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://uhckhpfvtpmwvprbkoal.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVoY2tocGZ2dHBtd3ZwcmJrb2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1ODM0NzcsImV4cCI6MjA5NzE1OTQ3N30.rmjd87a0GJV-MIw3y4gIfr0hbltQuvmDOtJ2P5aTxew';
+
+  function formatPhone(val) {
+    const digits = val.replace(/\D/g, '');
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 7) return digits.slice(0, 3) + '-' + digits.slice(3);
+    return digits.slice(0, 3) + '-' + digits.slice(3, 7) + '-' + digits.slice(7, 11);
+  }
+
+  document.getElementById('phoneInput').addEventListener('input', (e) => {
+    e.target.value = formatPhone(e.target.value);
+  });
+
+  document.getElementById('phoneInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') searchBookings();
+  });
+
+  async function searchBookings() {
+    const phone = document.getElementById('phoneInput').value.trim();
+    if (!phone) {
+      alert('연락처를 입력해 주세요.');
+      return;
+    }
+
+    document.getElementById('resultsWrap').style.display = 'none';
+    document.getElementById('emptyWrap').style.display = 'none';
+    document.getElementById('loadingWrap').style.display = 'block';
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/bookings?customer_phone=eq.${phone}&order=created_at.desc`, {
+        headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+      });
+      const data = await res.json();
+
+      document.getElementById('loadingWrap').style.display = 'none';
+
+      if (!data || data.length === 0) {
+        document.getElementById('emptyWrap').style.display = 'block';
+        return;
+      }
+
+      renderResults(data);
+    } catch (e) {
+      document.getElementById('loadingWrap').style.display = 'none';
+      alert('조회 실패: ' + e.message);
+    }
+  }
+
+  function renderResults(bookings) {
+    const html = bookings.map(b => `
+      <div class="result-item">
+        <div class="result-date">${new Date(b.created_at).toLocaleString('ko-KR')}</div>
+        <div class="result-row">
+          <span class="result-label">날짜</span>
+          <span class="result-val">${b.booking_date || '-'} ${getTimeLabel(b.booking_time)}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">부위</span>
+          <span class="result-val">${b.body_part || '-'}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">사이즈</span>
+          <span class="result-val">${b.width_cm && b.height_cm ? b.width_cm + 'cm × ' + b.height_cm + 'cm' : '-'}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">견적</span>
+          <span class="result-val">${b.estimated_price ? b.estimated_price.toLocaleString() + '원' : '-'}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">상태</span>
+          <span class="badge badge-${b.status}">${getStatusLabel(b.status)}</span>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('resultsList').innerHTML = html;
+    document.getElementById('resultsWrap').style.display = 'block';
+  }
+
+  function getStatusLabel(status) {
+    const map = {
+      pending: '신청대기',
+      approved: '승인됨',
+      paid: '결제완료',
+      done: '시술완료',
+      cancel: '취소'
+    };
+    return map[status] || status;
+  }
+
+  function getTimeLabel(time) {
+    if (time === '12:00') return '오전(12~16시)';
+    if (time === '16:00') return '오후(16~20시)';
+    return '';
+  }
+</script>
+
+</body>
+</html>
