@@ -45,6 +45,9 @@
   .about-desc { font-size: 14px; color: var(--text-muted); line-height: 1.8; }
   .about-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1rem; }
   .about-tag { font-size: 11px; padding: 4px 10px; border-radius: 999px; background: var(--purple-light); color: var(--purple-dark); }
+  .rule-item { background: var(--bg-soft); padding: 1rem; border-radius: var(--radius-sm); }
+  .rule-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .rule-desc { font-size: 13px; color: var(--text-muted); line-height: 1.8; }
   .insta-link { display: flex; align-items: center; gap: 6px; margin-top: 1rem; font-size: 13px; color: var(--purple); text-decoration: none; }
 
   .steps-bar { display: flex; padding: 0 1rem; border-bottom: 0.5px solid var(--border); overflow-x: auto; scrollbar-width: none; }
@@ -394,6 +397,68 @@
     <button class="btn-back" id="btnBack" onclick="goBack()" style="display:none">← 이전</button>
     <button class="btn-next" id="btnNext" onclick="goNext()">다음으로 →</button>
   </div>
+
+  <!-- 최종 확인 모달 -->
+  <div id="confirmModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center; flex-direction:column;">
+    <div style="background:white; padding:2rem; border-radius:12px; text-align:center; max-width:400px; margin:0 1rem;">
+      <div style="font-size:28px; margin-bottom:1rem;">🌙</div>
+      <h2 style="font-size:20px; margin-bottom:0.5rem;">예약을 신청할까요?</h2>
+      <p style="color:#666; font-size:14px; line-height:1.6; margin-bottom:2rem;">예약을 신청하면 명월이 확인한 후<br>카카오톡으로 예약금 결제 링크를 보내드립니다.</p>
+      <div style="display:flex; gap:10px;">
+        <button onclick="closeConfirmModal()" style="flex:1; padding:12px; background:#f0f0f0; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500;">취소</button>
+        <button onclick="confirmBooking()" style="flex:1; padding:12px; background:var(--purple); color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500;">네, 신청하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 규칙 동의 모달 -->
+  <div id="rulesModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center; overflow-y:auto; padding:2rem 0;">
+    <div style="background:white; padding:2rem; border-radius:12px; max-width:500px; margin:auto;">
+      <h2 style="font-size:18px; margin-bottom:1.5rem;">예약 규칙 안내</h2>
+      
+      <div style="max-height:400px; overflow-y:auto; margin-bottom:1.5rem; padding-right:1rem;">
+        <div style="margin-bottom:1.5rem;">
+          <div style="font-weight:600; color:var(--text); margin-bottom:0.5rem;">📋 취소/변경</div>
+          <div style="font-size:13px; color:var(--text-muted); line-height:1.8;">
+            • 예약일 7일 전까지 무료 취소/변경<br>
+            • 3~6일 전: 예약금의 50% 환불<br>
+            • 2~1일 전: 예약금의 30% 환불<br>
+            • 당일 취소: 예약금 환불 불가
+          </div>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <div style="font-weight:600; color:var(--text); margin-bottom:0.5rem;">💰 예약금</div>
+          <div style="font-size:13px; color:var(--text-muted); line-height:1.8;">
+            • 예약금은 최종 견적의 20% (최소 50,000원)<br>
+            • 예약금은 시술 당일 최종 비용에서 차감됨<br>
+            • 현금/계좌이체 모두 가능
+          </div>
+        </div>
+
+        <div>
+          <div style="font-weight:600; color:var(--text); margin-bottom:0.5rem;">⚠️ 주의사항</div>
+          <div style="font-size:13px; color:var(--text-muted); line-height:1.8;">
+            • 피부 질환이 있는 경우 상담 후 결정<br>
+            • 시술 후 3주간 충분한 보습과 자외선 차단 필수<br>
+            • 감염 의심 시 즉시 내원 또는 상담
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:1.5rem; padding:1rem; background:var(--bg-soft); border-radius:6px;">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px;">
+          <input type="checkbox" id="agreeCheck" style="width:18px; height:18px; cursor:pointer;">
+          위의 예약 규칙을 확인했으며 동의합니다.
+        </label>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button onclick="closeRulesModal()" style="flex:1; padding:12px; background:#f0f0f0; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500;">취소</button>
+        <button onclick="agreeAndContinue()" style="flex:1; padding:12px; background:var(--purple); color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500;">동의하고 진행</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -712,12 +777,43 @@
       if (curStep === 5) buildSummary();
       window.scrollTo(0, 0);
     } else {
-      saveBooking();
+      showRulesModal();
     }
   }
 
   function goBack() {
     if (curStep > 1) { curStep--; render(); window.scrollTo(0, 0); }
+  }
+
+  function showConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'flex';
+  }
+
+  function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+  }
+
+  function confirmBooking() {
+    closeConfirmModal();
+    saveBooking();
+  }
+
+  function showRulesModal() {
+    document.getElementById('rulesModal').style.display = 'flex';
+    document.getElementById('agreeCheck').checked = false;
+  }
+
+  function closeRulesModal() {
+    document.getElementById('rulesModal').style.display = 'none';
+  }
+
+  function agreeAndContinue() {
+    if (!document.getElementById('agreeCheck').checked) {
+      alert('예약 규칙에 동의해 주세요.');
+      return;
+    }
+    closeRulesModal();
+    showConfirmModal();
   }
 
   function render() {
